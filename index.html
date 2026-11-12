@@ -1,4 +1,4 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0"><script>(function(){var B="568016dd53";try{fetch("versao.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json()}).then(function(v){if(v&&v.build&&v.build!==B){var k="bolaoRecarregou";if(sessionStorage.getItem(k)===v.build)return;sessionStorage.setItem(k,v.build);location.replace(location.pathname+"?v="+v.build+location.hash)}}).catch(function(){})}catch(e){}})()</script><title>Gerador de Bolão</title>
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0"><script>(function(){var B="037589d1c6";try{fetch("versao.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json()}).then(function(v){if(v&&v.build&&v.build!==B){var k="bolaoRecarregou";if(sessionStorage.getItem(k)===v.build)return;sessionStorage.setItem(k,v.build);location.replace(location.pathname+"?v="+v.build+location.hash)}}).catch(function(){})}catch(e){}})()</script><title>Gerador de Bolão</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cg fill='%23209869'%3E%3Ccircle cx='22' cy='20' r='12'/%3E%3Ccircle cx='42' cy='20' r='12'/%3E%3Ccircle cx='22' cy='40' r='12'/%3E%3Ccircle cx='42' cy='40' r='12'/%3E%3C/g%3E%3Cpath d='M32 34 C36 46 40 54 48 60' stroke='%23209869' stroke-width='5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap">
@@ -209,10 +209,7 @@ html[data-pagina="simulador"] #abaGerar{gap:22px}
   <ul class="games" id="simples" hidden></ul>
 </section>
 
-<details class="regras">
-  <summary>As regras embutidas em todo jogo</summary>
-  <div class="stack" id="regras"></div>
-</details>
+<div id="regras" hidden></div>
 <p class="note" id="nota"></p>
 </div>
 
@@ -240,7 +237,7 @@ html[data-pagina="simulador"] #abaGerar{gap:22px}
 <section class="base stack" id="base">
   <h2>Base de sorteios</h2>
   <ul class="baselist" id="baseInfo"><li>Carregando…</li></ul>
-  <p class="hint">Para incluir os sorteios novos, baixe a planilha no site Loterias Caixa (Mega-Sena ou Lotofácil, Resultados, Download de resultados) e importe aqui. O app reconhece sozinho de qual jogo é a planilha e recalcula quais dezenas o público mais joga.</p>
+  <p class="hint" id="baseHint"></p>
   <div class="actions">
     <label class="btn solid" for="arquivo">Importar planilha da Caixa</label>
     <input type="file" id="arquivo" accept=".xlsx,.xls,.csv" hidden>
@@ -558,7 +555,7 @@ function geraLF(){
   $('msg').textContent='';
   $('resTitulo').textContent='Seus jogos: Lotofácil, estratégia '+e.nome;
   var ordem=cob.map(function(v,i){return[v,i+1]}).sort(function(a,b){return b[0]-a[0]});
-  $('resumo').textContent=descreveLF(p)+', total de '+dinheiro(p.total)+'. Dezenas mais usadas neste conjunto: '+ordem.slice(0,6).map(function(a){return a[1]}).sort(function(a,b){return a-b}).join(', ')+'. Menos usadas: '+ordem.slice(-4).map(function(a){return a[1]}).sort(function(a,b){return a-b}).join(', ')+'.';
+  $('resumo').textContent=descreveLF(p)+'. Dezenas mais usadas neste conjunto: '+ordem.slice(0,6).map(function(a){return a[1]}).sort(function(a,b){return a-b}).join(', ')+'. Menos usadas: '+ordem.slice(-4).map(function(a){return a[1]}).sort(function(a,b){return a-b}).join(', ')+'.';
   var nAp=r.apostas.length;
   $('stats').innerHTML='<div><b>'+br(nAp)+'</b><span>'+(nAp>1?'apostas':'aposta')+', '+dinheiro(p.total)+'</span></div>';
   var teto=Math.max.apply(null,cob)||1,hv='';
@@ -588,7 +585,7 @@ function gera(){
   ultimoNome='bolao-megasena-'+e.nome.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-')+'-R'+p.total+'.csv';
   $('msg').textContent='';
   $('resTitulo').textContent='Seus jogos: estratégia '+e.nome;
-  $('resumo').textContent=descreve(p)+', total de R$ '+br(p.total)+'. Em média '+(baixas/dez*6).toFixed(1).replace('.',',')+' dezena até 31 a cada 6. Um jogo ao acaso tem 3,1. Dezenas mais usadas neste conjunto: '+cob.map(function(v,i){return[v,i+1]}).sort(function(a,b){return b[0]-a[0]}).slice(0,8).map(function(a){return a[1]}).sort(function(a,b){return a-b}).join(', ')+'.';
+  $('resumo').textContent=descreve(p)+'. Em média '+(baixas/dez*6).toFixed(1).replace('.',',')+' dezena até 31 a cada 6. Um jogo ao acaso tem 3,1. Dezenas mais usadas neste conjunto: '+cob.map(function(v,i){return[v,i+1]}).sort(function(a,b){return b[0]-a[0]}).slice(0,8).map(function(a){return a[1]}).sort(function(a,b){return a-b}).join(', ')+'.';
   $('stats').innerHTML='<div><b>'+br(r.jogos.length)+'</b><span>'+(r.jogos.length>1?'apostas':'aposta')+', R$ '+br(p.total)+'</span></div>';
   var teto=Math.max.apply(null,cob)||1,hv='';
   for(var x=1;x<=60;x++){var q=Math.pow(cob[x-1]/teto,.6);hv+='<span'+(q>.5?' class="on"':'')+' style="--p:'+q.toFixed(2)+'">'+(x<10?'0':'')+x+'</span>'}
@@ -793,8 +790,9 @@ function linhaBase(b){return br(b.n)+' sorteios, até o concurso '+b.ultimo+' ('
 function mostraBase(){
   var b=JOGO==='lf'?BASELF:BASE;
   $('baseTopo').textContent=(JOGO==='lf'?'Lotofácil':'Mega-Sena')+' · base: '+linhaBase(b);
-  $('baseInfo').innerHTML='<li><strong>Mega-Sena:</strong> '+linhaBase(BASE)+'; '+ORIGEM.mega+'.</li><li><strong>Lotofácil:</strong> '+linhaBase(BASELF)+'; '+ORIGEM.lf+'.</li>';
-  $('versaoTopo').textContent=APP_VERSAO;$('versaoRodape').textContent=APP_VERSAO+' · Mega base '+BASE.ultimo+' · Lotofácil base '+BASELF.ultimo;
+  var nj=JOGO==='lf'?'Lotofácil':'Mega-Sena';$('baseHint').textContent='Para incluir os sorteios novos, baixe a planilha da '+nj+' no site Loterias Caixa ('+nj+', Resultados, Download de resultados) e importe aqui. O app recalcula quais dezenas o público mais joga e atualiza o simulador.';
+  $('baseInfo').innerHTML='<li><strong>'+(JOGO==='lf'?'Lotofácil':'Mega-Sena')+':</strong> '+linhaBase(b)+'; '+ORIGEM[JOGO]+'.</li>';
+  $('versaoTopo').textContent=APP_VERSAO;$('versaoRodape').textContent=APP_VERSAO+' · '+(JOGO==='lf'?'Lotofácil':'Mega-Sena')+' base '+b.ultimo;
 }
 function aplicaBase(b,origem,jogo){
   if(!b.ult||!b.ult.length)b.ult=(jogo==='lf'?BASELF:BASE).ult;
