@@ -1,4 +1,4 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0"><script>(function(){var B="037589d1c6";try{fetch("versao.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json()}).then(function(v){if(v&&v.build&&v.build!==B){var k="bolaoRecarregou";if(sessionStorage.getItem(k)===v.build)return;sessionStorage.setItem(k,v.build);location.replace(location.pathname+"?v="+v.build+location.hash)}}).catch(function(){})}catch(e){}})()</script><title>Gerador de Bolão</title>
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0"><script>(function(){var B="ccbdc41b21";try{fetch("versao.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json()}).then(function(v){if(v&&v.build&&v.build!==B){var k="bolaoRecarregou";if(sessionStorage.getItem(k)===v.build)return;sessionStorage.setItem(k,v.build);location.replace(location.pathname+"?v="+v.build+location.hash)}}).catch(function(){})}catch(e){}})()</script><title>Gerador de Bolão</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cg fill='%23209869'%3E%3Ccircle cx='22' cy='20' r='12'/%3E%3Ccircle cx='42' cy='20' r='12'/%3E%3Ccircle cx='22' cy='40' r='12'/%3E%3Ccircle cx='42' cy='40' r='12'/%3E%3C/g%3E%3Cpath d='M32 34 C36 46 40 54 48 60' stroke='%23209869' stroke-width='5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap">
@@ -98,6 +98,7 @@ label.btn{display:inline-block}
 #grandes,#simples{display:none!important}
 .two{grid-template-columns:minmax(0,1fr)!important}
 .two figure{display:none!important}
+#hintEstr{display:none!important}
 .msg:empty{display:none}
 .abas{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .abas .aba{text-decoration:none;font:700 17px var(--display);padding:13px 10px;background:var(--surface);border:2px solid var(--line);border-radius:8px;color:var(--ink);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}
@@ -176,7 +177,7 @@ html[data-pagina="simulador"] #abaGerar{gap:22px}
 
 <section class="stack">
   <h2 class="step"><b>2</b>Qual estratégia?</h2>
-  <p class="hint" id="hintEstr">A chance da sena é igual em todas. Muda quantas vezes você ganha algo e quanto leva. Toque em uma para ver como ela escolhe os números.</p>
+  <p class="hint" id="hintEstr" hidden>A chance da sena é igual em todas. Muda quantas vezes você ganha algo e quanto leva. Toque em uma para ver como ela escolhe os números.</p>
   <div class="strats" id="strats"></div>
 </section>
 
