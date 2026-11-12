@@ -1,5 +1,5 @@
 <!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Gerador de Bolão</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='22' cy='38' r='16' fill='%23209869'/%3E%3Ccircle cx='42' cy='26' r='16' fill='%23930089'/%3E%3Ccircle cx='42' cy='26' r='7' fill='%23fff'/%3E%3Ccircle cx='22' cy='38' r='7' fill='%23fff'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cg fill='%23209869'%3E%3Ccircle cx='22' cy='20' r='12'/%3E%3Ccircle cx='42' cy='20' r='12'/%3E%3Ccircle cx='22' cy='40' r='12'/%3E%3Ccircle cx='42' cy='40' r='12'/%3E%3C/g%3E%3Cpath d='M32 34 C36 46 40 54 48 60' stroke='%23209869' stroke-width='5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap">
 <style>
@@ -33,7 +33,7 @@ h1{font-size:clamp(27px,5vw,42px);line-height:1.04;font-weight:700}
 h2{font-size:clamp(21px,3.2vw,26px);line-height:1.2;font-weight:700}
 p{margin:0;max-width:64ch}
 .stack{display:flex;flex-direction:column;gap:10px}
-.eyebrow{font:600 13px/1 var(--body);letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.eyebrow{font:700 14px/1 var(--body);letter-spacing:.09em;text-transform:uppercase;color:var(--accent)}
 .lead{font-size:17px;color:var(--muted)}
 .step{display:flex;align-items:baseline;gap:12px}
 .step b{font:700 15px/1 var(--mono);background:var(--ink);color:var(--bg);width:28px;height:28px;display:inline-grid;place-items:center;border-radius:4px;flex:none}
@@ -95,10 +95,12 @@ footer strong{color:var(--ink);font-weight:600}
 .btn.solid:hover{filter:brightness(1.15)}
 label.btn{display:inline-block}
 .strat .why{background:color-mix(in srgb,var(--mark) 22%,transparent);border-left:3px solid var(--mark);padding:6px 10px;border-radius:0 4px 4px 0;margin:4px 0 2px}
+#grandes,#simples{display:none!important}
 .msg:empty{display:none}
-.abas{display:flex;gap:4px;border-bottom:2px solid var(--line)}
-.abas button{font:700 17px var(--display);padding:10px 14px;background:none;border:0;border-bottom:3px solid transparent;margin-bottom:-2px;color:var(--muted);cursor:pointer}
-.abas button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+.abas{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.abas button{font:700 17px var(--display);padding:13px 10px;background:var(--surface);border:2px solid var(--line);border-radius:8px;color:var(--ink);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}
+.abas button svg{width:20px;height:20px;flex:none}
+.abas button[aria-selected="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);color:var(--accent)}
 .grupo{display:flex;flex-direction:column;gap:28px}
 .grupo[hidden]{display:none}
 .opcoes{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
@@ -133,11 +135,11 @@ label.btn{display:inline-block}
 <script src="https://telegram.org/js/telegram-web-app.js"></script><script>try{var tw=window.Telegram&&Telegram.WebApp;if(tw&&tw.initData!==undefined){tw.ready();tw.expand()}}catch(e){}</script></head><body><div class="wrap">
 <header class="stack">
   <div class="topo" aria-hidden="true"></div>
-  <span class="eyebrow"><span id="eyebrow">Mega-Sena · qualquer concurso, inclusive a Virada</span> · <span id="versaoTopo">v2.2</span></span>
+  <span class="eyebrow" id="eyebrow">Mega-Sena</span><span id="versaoTopo" hidden></span>
   <div class="marca">
     <svg class="logo" viewBox="0 0 64 64" aria-hidden="true">
-      <circle cx="21" cy="41" r="19" fill="#209869"/><circle cx="21" cy="41" r="11" fill="#fff"/><text x="21" y="46" text-anchor="middle" font-size="14" font-weight="700" fill="#209869" font-family="IBM Plex Mono,monospace">6</text>
-      <circle cx="43" cy="23" r="19" fill="#930089" stroke="var(--bg)" stroke-width="2"/><circle cx="43" cy="23" r="11" fill="#fff"/><text x="43" y="27.5" text-anchor="middle" font-size="12" font-weight="700" fill="#930089" font-family="IBM Plex Mono,monospace">15</text>
+      <g fill="var(--accent)"><circle cx="22" cy="20" r="12"/><circle cx="42" cy="20" r="12"/><circle cx="22" cy="40" r="12"/><circle cx="42" cy="40" r="12"/></g>
+      <path d="M32 34 C36 46 40 54 48 60" stroke="var(--accent)" stroke-width="5" fill="none" stroke-linecap="round"/>
     </svg>
     <h1>Gerador de Bolão</h1>
   </div>
@@ -150,8 +152,8 @@ label.btn{display:inline-block}
 </header>
 
 <nav class="abas" role="tablist" aria-label="Seções">
-  <button type="button" role="tab" id="tabGerar" aria-selected="true" aria-controls="abaGerar">Gerar jogos</button>
-  <button type="button" role="tab" id="tabSimular" aria-selected="false" aria-controls="abaSimular">Simular acertos</button>
+  <button type="button" role="tab" id="tabGerar" aria-selected="true" aria-controls="abaGerar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8.5" cy="8.5" r="1.3" fill="currentColor"/><circle cx="15.5" cy="15.5" r="1.3" fill="currentColor"/><circle cx="15.5" cy="8.5" r="1.3" fill="currentColor"/><circle cx="8.5" cy="15.5" r="1.3" fill="currentColor"/></svg>Gerar jogos</button>
+  <button type="button" role="tab" id="tabSimular" aria-selected="false" aria-controls="abaSimular"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Simular acertos</button>
 </nav>
 
 <div class="grupo" id="abaGerar" role="tabpanel" aria-labelledby="tabGerar">
@@ -192,15 +194,16 @@ label.btn{display:inline-block}
     <div class="stack">
       <p id="resumo"></p>
       <div class="actions">
-        <button class="btn solid" id="exportar" type="button">Exportar CSV</button>
+        <button class="btn solid" id="exportar" type="button">Exportar números (CSV)</button>
         <button class="btn" id="copiar" type="button">Copiar jogos</button>
       </div>
       <p class="msg" id="msg" role="status"></p>
-      <p class="hint">O CSV traz uma aposta por linha, uma dezena por coluna. Abre no Excel e pode ir direto para a lotérica.</p>
+      <p class="hint">Os jogos não aparecem na tela para a página não ficar enorme. Exporte o CSV (uma aposta por linha, abre no Excel e pode ir direto para a lotérica) ou copie para colar no WhatsApp.</p>
+      <button class="btn" id="irSimular" type="button">Simular nos últimos 50 sorteios →</button>
     </div>
   </div>
-  <ul class="games big" id="grandes"></ul>
-  <ul class="games" id="simples"></ul>
+  <ul class="games big" id="grandes" hidden></ul>
+  <ul class="games" id="simples" hidden></ul>
 </section>
 
 <details class="regras">
@@ -263,14 +266,14 @@ try{if(localStorage.getItem('bolaoJogo')==='lf')JOGO='lf'}catch(e){}
 var ESCOLHA = {mega:'espalhada', lf:'lf_amplo'};
 var ORIGEM = {mega:'embutida nesta versão do app', lf:'embutida nesta versão do app'};
 var TEXTO = {
-  mega:{eyebrow:'Mega-Sena · qualquer concurso, inclusive a Virada',
+  mega:{eyebrow:'Mega-Sena',
     lead:'Informe o valor, escolha a estratégia e gere os jogos. As regras saem dos sorteios oficiais da Mega-Sena.',
     hintEstr:'A chance da sena é igual em todas. Muda quantas vezes você ganha algo e quanto leva. Toque em uma para ver como ela escolhe os números.',
     regras:['Poucas dezenas até 31: muita gente aposta datas de aniversário, e resultados cheios delas tiveram até 1,8 vez mais ganhadores dividindo o prêmio.',
       'Preferência pelas dezenas menos jogadas. Sem sequência de 3 números, linha ou coluna cheia, nem excesso de múltiplos de 5.',
       'Jogos afastados uns dos outros, para o dinheiro não cair duas vezes no mesmo lugar.'],
     nota:'<strong>É sorteio.</strong> Nenhuma estratégia muda a chance de uma combinação sair, e a cada R$ 6 apostados voltam em média cerca de R$ 2. O gerador só faz o dinheiro trabalhar melhor.'},
-  lf:{eyebrow:'Lotofácil · sorteios de segunda a sábado',
+  lf:{eyebrow:'Lotofácil',
     lead:'Informe o valor, escolha a estratégia e gere os jogos. As regras saem dos sorteios oficiais da Lotofácil.',
     hintEstr:'A chance de 15 pontos é praticamente igual em todas. Muda quantas vezes você faz 14 e quantas vezes recupera o dinheiro. Toque em uma para ver como ela escolhe os números.',
     regras:['Leve preferência pelas dezenas menos jogadas pelo público. Na Lotofácil esse efeito é pequeno: no teste com sorteios que o app não tinha visto, o prêmio de 14 não saiu maior. Fica só como desempate.',
@@ -613,6 +616,7 @@ atual=ESCOLHA[JOGO];
 $('tabGerar').addEventListener('click',function(){trocaAba('gerar')});
 $('tabSimular').addEventListener('click',function(){trocaAba('simular')});
 $('simular').addEventListener('click',simular);
+$('irSimular').addEventListener('click',function(){trocaAba('simular');$('simModo').value='mesmos';window.scrollTo({top:0,behavior:'smooth'});simular()});
 $('jogo').addEventListener('click',function(ev){var j=ev.target.getAttribute&&ev.target.getAttribute('data-j');if(j)trocaJogo(j)});
 $('strats').addEventListener('change',function(ev){if(ev.target.name==='estr'){atual=ev.target.value;atualiza()}});
 $('valor').addEventListener('input',atualiza);
@@ -621,7 +625,7 @@ $('prontos').addEventListener('change',function(){if(this.value){$('valor').valu
 $('chips').addEventListener('click',function(ev){var d=parseInt(ev.target.getAttribute('data-d'),10);if(d){$('valor').value=Math.max(6,Math.min(30000,valor()+d));$('prontos').value='';atualiza()}});
 $('gerar').addEventListener('click',function(){gera();$('resultado').scrollIntoView({behavior:'smooth',block:'start'})});
 $('copiar').addEventListener('click',function(){
-  function falhou(){$('msg').textContent='Não deu para copiar aqui. Use o botão Exportar CSV.'}
+  function falhou(){$('msg').textContent='Não deu para copiar aqui. Use o botão Exportar números (CSV).'}
   try{navigator.clipboard.writeText(ultimoTexto).then(function(){$('msg').textContent='Copiado. Agora é só colar.'},falhou)}catch(e){falhou()}
 });
 
