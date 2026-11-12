@@ -1,4 +1,4 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0"><script>(function(){var B="f1337cc705";try{fetch("versao.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json()}).then(function(v){if(v&&v.build&&v.build!==B){var k="bolaoRecarregou";if(sessionStorage.getItem(k)===v.build)return;sessionStorage.setItem(k,v.build);location.replace(location.pathname+"?v="+v.build+location.hash)}}).catch(function(){})}catch(e){}})()</script><title>Simulador de Bolão</title>
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0"><script>(function(){var B="568016dd53";try{fetch("versao.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json()}).then(function(v){if(v&&v.build&&v.build!==B){var k="bolaoRecarregou";if(sessionStorage.getItem(k)===v.build)return;sessionStorage.setItem(k,v.build);location.replace(location.pathname+"?v="+v.build+location.hash)}}).catch(function(){})}catch(e){}})()</script><title>Simulador de Bolão</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cg fill='%23209869'%3E%3Ccircle cx='22' cy='20' r='12'/%3E%3Ccircle cx='42' cy='20' r='12'/%3E%3Ccircle cx='22' cy='40' r='12'/%3E%3Ccircle cx='42' cy='40' r='12'/%3E%3C/g%3E%3Cpath d='M32 34 C36 46 40 54 48 60' stroke='%23209869' stroke-width='5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap">
@@ -96,6 +96,8 @@ footer strong{color:var(--ink);font-weight:600}
 label.btn{display:inline-block}
 .strat .why{background:color-mix(in srgb,var(--mark) 22%,transparent);border-left:3px solid var(--mark);padding:6px 10px;border-radius:0 4px 4px 0;margin:4px 0 2px}
 #grandes,#simples{display:none!important}
+.two{grid-template-columns:minmax(0,1fr)!important}
+.two figure{display:none!important}
 .msg:empty{display:none}
 .abas{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .abas .aba{text-decoration:none;font:700 17px var(--display);padding:13px 10px;background:var(--surface);border:2px solid var(--line);border-radius:8px;color:var(--ink);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}
@@ -190,7 +192,7 @@ html[data-pagina="simulador"] #abaGerar{gap:22px}
     <div class="stats" id="stats"></div>
   </div>
   <div class="two">
-    <figure>
+    <figure hidden>
       <div class="vol" id="vol"></div>
       <figcaption>Onde o dinheiro ficou. Quanto mais escura a dezena, mais jogos passam por ela.</figcaption>
     </figure>
@@ -558,15 +560,10 @@ function geraLF(){
   var ordem=cob.map(function(v,i){return[v,i+1]}).sort(function(a,b){return b[0]-a[0]});
   $('resumo').textContent=descreveLF(p)+', total de '+dinheiro(p.total)+'. Dezenas mais usadas neste conjunto: '+ordem.slice(0,6).map(function(a){return a[1]}).sort(function(a,b){return a-b}).join(', ')+'. Menos usadas: '+ordem.slice(-4).map(function(a){return a[1]}).sort(function(a,b){return a-b}).join(', ')+'.';
   var nAp=r.apostas.length;
-  $('stats').innerHTML='<div><b>'+br(nAp)+'</b><span>'+(nAp>1?'apostas':'aposta')+', '+dinheiro(p.total)+'</span></div>'+
-    '<div><b>1 em '+br(TOTLF/combos)+'</b><span>chance de 15 pontos</span></div>'+
-    '<div><b id="lf14">…</b><span>chance de ao menos um 14</span></div>'+
-    '<div><b id="lfMet">…</b><span>chance de voltar metade ou mais do valor</span></div>'+
-    '<div><b id="lfLuc">…</b><span>chance de lucro</span></div>';
+  $('stats').innerHTML='<div><b>'+br(nAp)+'</b><span>'+(nAp>1?'apostas':'aposta')+', '+dinheiro(p.total)+'</span></div>';
   var teto=Math.max.apply(null,cob)||1,hv='';
   for(var x=1;x<=25;x++){var q=Math.pow(cob[x-1]/teto,1.5);hv+='<span'+(q>.5?' class="on"':'')+' style="--p:'+q.toFixed(2)+'">'+d2(x)+'</span>'}
   $('vol').innerHTML=hv;$('vol').classList.add('lf');
-  setTimeout(function(){var s=simulaLF(r,p.total);$('lf14').textContent=pct(s.p14);$('lfMet').textContent=pct(s.met);$('lfLuc').textContent=pct(s.luc)},30);
 }
 function gera(){
   if(JOGO==='lf')return geraLF();
@@ -592,13 +589,10 @@ function gera(){
   $('msg').textContent='';
   $('resTitulo').textContent='Seus jogos: estratégia '+e.nome;
   $('resumo').textContent=descreve(p)+', total de R$ '+br(p.total)+'. Em média '+(baixas/dez*6).toFixed(1).replace('.',',')+' dezena até 31 a cada 6. Um jogo ao acaso tem 3,1. Dezenas mais usadas neste conjunto: '+cob.map(function(v,i){return[v,i+1]}).sort(function(a,b){return b[0]-a[0]}).slice(0,8).map(function(a){return a[1]}).sort(function(a,b){return a-b}).join(', ')+'.';
-  $('stats').innerHTML='<div><b>'+br(r.jogos.length)+'</b><span>'+(r.jogos.length>1?'apostas':'aposta')+', R$ '+br(p.total)+'</span></div>'+
-    '<div><b>1 em '+br(TOTAL/combos)+'</b><span>chance de acertar a sena</span></div>'+
-    '<div><b id="quadra">…</b><span>chance de ao menos uma quadra</span></div>';
+  $('stats').innerHTML='<div><b>'+br(r.jogos.length)+'</b><span>'+(r.jogos.length>1?'apostas':'aposta')+', R$ '+br(p.total)+'</span></div>';
   var teto=Math.max.apply(null,cob)||1,hv='';
   for(var x=1;x<=60;x++){var q=Math.pow(cob[x-1]/teto,.6);hv+='<span'+(q>.5?' class="on"':'')+' style="--p:'+q.toFixed(2)+'">'+(x<10?'0':'')+x+'</span>'}
   $('vol').innerHTML=hv;
-  setTimeout(function(){var v=simula(r);$('quadra').textContent=v<1?'menos de 1%':'cerca de '+Math.round(v)+'%'},30);
 }
 function aplicaTextos(){
   var T=TEXTO[JOGO];
