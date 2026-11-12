@@ -96,6 +96,23 @@ footer strong{color:var(--ink);font-weight:600}
 label.btn{display:inline-block}
 .strat .why{background:color-mix(in srgb,var(--mark) 22%,transparent);border-left:3px solid var(--mark);padding:6px 10px;border-radius:0 4px 4px 0;margin:4px 0 2px}
 .msg:empty{display:none}
+.abas{display:flex;gap:4px;border-bottom:2px solid var(--line)}
+.abas button{font:700 17px var(--display);padding:10px 14px;background:none;border:0;border-bottom:3px solid transparent;margin-bottom:-2px;color:var(--muted);cursor:pointer}
+.abas button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+.grupo{display:flex;flex-direction:column;gap:28px}
+.grupo[hidden]{display:none}
+.opcoes{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.opcoes select{font:600 15px var(--body);padding:8px 10px;border-radius:6px;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+.tabela{overflow-x:auto;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+.tabela table{border-collapse:collapse;width:100%;font:500 13.5px/1.3 var(--mono);font-variant-numeric:tabular-nums}
+.tabela th{font:600 12.5px var(--body);color:var(--muted);text-align:right;padding:8px 8px;border-bottom:1px solid var(--line);white-space:nowrap;position:sticky;top:0;background:var(--surface)}
+.tabela td{text-align:right;padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+.tabela th:first-child,.tabela td:first-child{text-align:left}
+.tabela td.z{color:var(--line)}
+.tabela tr.ganhou td{background:color-mix(in srgb,var(--accent) 12%,transparent)}
+.tabela tr.ganhou td.premio{font-weight:600;color:var(--accent)}
+.tabela tfoot td{font-weight:600;border-top:2px solid var(--ink);border-bottom:0}
+.prog{font-size:14.5px;color:var(--muted)}
 .marca{display:flex;align-items:center;gap:12px}
 .logo{width:58px;height:58px;flex:none}
 .jogo{display:grid;grid-template-columns:1fr 1fr;border:2px solid var(--ink);border-radius:8px;overflow:hidden;max-width:440px}
@@ -131,6 +148,13 @@ label.btn{display:inline-block}
   </div>
   <p class="basebar"><span class="dot" aria-hidden="true"></span><span id="baseTopo">Base: carregando…</span></p>
 </header>
+
+<nav class="abas" role="tablist" aria-label="Seções">
+  <button type="button" role="tab" id="tabGerar" aria-selected="true" aria-controls="abaGerar">Gerar jogos</button>
+  <button type="button" role="tab" id="tabSimular" aria-selected="false" aria-controls="abaSimular">Simular acertos</button>
+</nav>
+
+<div class="grupo" id="abaGerar" role="tabpanel" aria-labelledby="tabGerar">
 
 <section class="stack">
   <h2 class="step"><b>1</b>Quanto vamos apostar?</h2>
@@ -184,6 +208,29 @@ label.btn{display:inline-block}
   <div class="stack" id="regras"></div>
 </details>
 <p class="note" id="nota"></p>
+</div>
+
+<div class="grupo" id="abaSimular" role="tabpanel" aria-labelledby="tabSimular" hidden>
+<section class="stack">
+  <h2 id="simTitulo">Simular acertos</h2>
+  <p class="lead">Confere o bolão contra os últimos sorteios reais, com o prêmio que foi pago de verdade em cada um. Mostra quanto o bolão teria ganhado em cada sorteio.</p>
+  <p class="hint" id="simJogos"></p>
+  <div class="opcoes">
+    <label>Sorteios <select id="simN"><option value="10">últimos 10</option><option value="20">últimos 20</option><option value="50" selected>últimos 50</option></select></label>
+    <label>Jogos <select id="simModo"><option value="novos" selected>novos a cada sorteio</option><option value="mesmos">os mesmos em todos</option></select></label>
+  </div>
+  <button class="go" id="simular" type="button">Simular</button>
+  <p class="hint">"Novos a cada sorteio" gera um bolão diferente para cada concurso, como seria na vida real, com a estratégia e o valor escolhidos na aba Gerar jogos. "Os mesmos em todos" confere os jogos que estão gerados agora.</p>
+  <p class="prog" id="simProg" role="status"></p>
+</section>
+<section class="result" id="simRes" hidden>
+  <div class="stats" id="simStats"></div>
+  <div class="tabela"><table id="simTab"></table></div>
+  <div class="actions"><button class="btn" id="simExportar" type="button">Exportar simulação (CSV)</button></div>
+  <p class="msg" id="simMsg" role="status"></p>
+  <p class="hint">Prêmios: valor pago por aposta naquele concurso, conforme o rateio da Caixa. Se o prêmio máximo saísse num concurso que acumulou, o valor real seria o prêmio acumulado e aparece marcado com *.</p>
+</section>
+</div>
 
 <section class="base stack" id="base">
   <h2>Base de sorteios</h2>
@@ -205,10 +252,10 @@ label.btn{display:inline-block}
 <script>
 var APP_VERSAO = 'v2.1';
 // base embutida: popularidade de cada dezena (1..60, acima de zero = mais jogada que a media) e ate onde vao os sorteios
-var BASE = {"pop": [0.035, 0.124, 0.321, 0.109, 0.248, 0.097, 0.218, 0.109, 0.142, 0.16, 0.137, 0.147, 0.243, 0.056, 0.068, 0.031, 0.151, 0.065, 0.128, 0.013, -0.009, 0.036, 0.095, 0.124, 0.11, -0.049, 0.1, 0.021, 0.116, -0.109, -0.12, -0.034, 0.097, -0.007, -0.0, 0.029, 0.006, -0.046, -0.067, -0.085, -0.125, -0.023, -0.034, 0.061, -0.019, -0.064, -0.04, -0.058, -0.045, -0.205, -0.063, -0.088, -0.046, -0.071, -0.109, -0.02, -0.035, 0.023, -0.083, -0.084], "ultimo": 3084, "data": "10/11/2026", "n": 3070, "atualizado": "embutida"};
+var BASE = {"pop": [0.035, 0.124, 0.321, 0.109, 0.248, 0.097, 0.218, 0.109, 0.142, 0.16, 0.137, 0.147, 0.243, 0.056, 0.068, 0.031, 0.151, 0.065, 0.128, 0.013, -0.009, 0.036, 0.095, 0.124, 0.11, -0.049, 0.1, 0.021, 0.116, -0.109, -0.12, -0.034, 0.097, -0.007, -0.0, 0.029, 0.006, -0.046, -0.067, -0.085, -0.125, -0.023, -0.034, 0.061, -0.019, -0.064, -0.04, -0.058, -0.045, -0.205, -0.063, -0.088, -0.046, -0.071, -0.109, -0.02, -0.035, 0.023, -0.083, -0.084], "ultimo": 3084, "data": "10/11/2026", "n": 3070, "atualizado": "embutida", "ult": [[3035, "23/07/2026", [5, 7, 17, 51, 56, 59], [824.44, 41401.04, 0]], [3036, "26/07/2026", [5, 12, 21, 33, 43, 50], [586.92, 28109.79, 0]], [3037, "28/07/2026", [2, 11, 22, 30, 51, 54], [1147.01, 63121.17, 0]], [3038, "30/07/2026", [30, 35, 38, 39, 46, 50], [1716.31, 64733.96, 0]], [3039, "02/08/2026", [14, 16, 21, 39, 53, 58], [1028.31, 45932.28, 0]], [3040, "04/08/2026", [3, 16, 24, 30, 49, 54], [1057.65, 47258.21, 0]], [3041, "06/08/2026", [16, 21, 24, 31, 43, 54], [1110.41, 52843.18, 0]], [3042, "09/08/2026", [2, 5, 10, 35, 40, 53], [706.56, 22927.51, 164895645.5]], [3043, "11/08/2026", [10, 11, 16, 37, 42, 53], [440.09, 20836.65, 3077413.08]], [3044, "13/08/2026", [4, 15, 17, 40, 55, 58], [1288.19, 61152.83, 0]], [3045, "16/08/2026", [23, 29, 33, 42, 43, 57], [1113.23, 89393.18, 0]], [3046, "18/08/2026", [16, 23, 24, 33, 36, 52], [1039.35, 50460.11, 0]], [3047, "20/08/2026", [4, 18, 22, 26, 31, 58], [782.39, 33112.49, 0]], [3048, "23/08/2026", [2, 6, 27, 39, 44, 50], [986.17, 34212.24, 57261598.1]], [3049, "25/08/2026", [6, 13, 36, 43, 53, 55], [971.64, 41986.04, 0]], [3050, "27/08/2026", [11, 14, 30, 38, 49, 55], [1415.06, 55536.51, 0]], [3051, "30/08/2026", [11, 15, 20, 21, 38, 48], [1186.14, 55635.04, 0]], [3052, "01/09/2026", [16, 30, 40, 47, 48, 60], [1646.74, 80825.85, 0]], [3053, "03/09/2026", [1, 13, 25, 35, 39, 51], [912.43, 36500.74, 0]], [3054, "06/09/2026", [8, 17, 24, 43, 47, 58], [735.73, 30145.38, 0]], [3055, "08/09/2026", [1, 11, 36, 43, 48, 49], [1111.21, 34793.09, 0]], [3056, "10/09/2026", [14, 21, 25, 40, 51, 56], [1133.49, 45990.43, 0]], [3057, "13/09/2026", [2, 4, 16, 21, 48, 53], [863.24, 31872.72, 0]], [3058, "15/09/2026", [14, 23, 53, 56, 57, 60], [1185.42, 53305.58, 0]], [3059, "17/09/2026", [1, 2, 7, 18, 33, 35], [763.77, 31664.29, 101970706.13]], [3060, "20/09/2026", [6, 15, 23, 36, 37, 38], [929.52, 32111.66, 0]], [3061, "22/09/2026", [24, 25, 28, 37, 47, 55], [1262.94, 42199.06, 0]], [3062, "24/09/2026", [5, 9, 11, 17, 18, 38], [552.38, 19736.75, 0]], [3063, "27/09/2026", [5, 35, 36, 41, 43, 48], [1322.81, 73111.35, 0]], [3064, "29/09/2026", [4, 10, 20, 25, 27, 48], [727.39, 24039.44, 0]], [3065, "01/10/2026", [8, 10, 30, 38, 50, 53], [1053.03, 49503.22, 0]], [3066, "03/10/2026", [4, 6, 9, 13, 28, 48], [608.56, 25224.37, 0]], [3067, "06/10/2026", [1, 4, 17, 33, 41, 52], [643.89, 33382.67, 0]], [3068, "08/10/2026", [7, 10, 39, 40, 43, 57], [1084.1, 51808.94, 0]], [3069, "11/10/2026", [5, 19, 22, 44, 47, 57], [709.33, 26095.23, 0]], [3070, "14/10/2026", [19, 27, 29, 43, 54, 60], [1071.93, 52767.96, 0]], [3071, "18/10/2026", [12, 22, 41, 45, 51, 52], [1339.55, 58806.72, 0]], [3072, "20/10/2026", [2, 6, 9, 16, 31, 40], [954.26, 38295.72, 0]], [3073, "22/10/2026", [4, 13, 23, 28, 41, 58], [510.55, 23138.67, 0]], [3074, "24/10/2026", [2, 3, 20, 25, 39, 57], [651.0, 30318.56, 0]], [3075, "26/10/2026", [7, 10, 14, 27, 36, 55], [458.57, 19433.12, 0]], [3076, "27/10/2026", [6, 30, 32, 38, 49, 57], [869.3, 58086.17, 0]], [3077, "28/10/2026", [2, 14, 18, 31, 35, 40], [701.97, 32185.33, 324898791.61]], [3078, "29/10/2026", [5, 7, 12, 29, 34, 36], [394.27, 20770.47, 0]], [3079, "30/10/2026", [5, 9, 16, 40, 41, 59], [783.1, 50706.28, 0]], [3080, "01/11/2026", [13, 17, 28, 29, 39, 58], [514.1, 38878.66, 0]], [3081, "04/11/2026", [10, 17, 42, 43, 57, 59], [664.35, 26360.17, 0]], [3082, "06/11/2026", [4, 16, 23, 24, 38, 44], [514.19, 20116.27, 0]], [3083, "08/11/2026", [22, 25, 29, 37, 46, 54], [649.17, 23220.26, 59526903.72]], [3084, "10/11/2026", [6, 14, 22, 30, 31, 37], [518.66, 28344.4, 3287949.91]]]};
 var POP = BASE.pop;
 // Lotofacil: mesma ideia (1..25) e as matrizes de desdobramento (indices 0..v-1 das dezenas do grupo), conferidas em todos os casos
-var BASELF = {"pop": [-0.0002, 0.0055, 0.0168, -0.0053, 0.0218, -0.053, 0.0038, 0.0012, 0.0065, 0.019, 0.0051, -0.0001, 0.0331, -0.0038, 0.0029, -0.0495, -0.0054, -0.0009, 0.0013, -0.0008, -0.0176, -0.0208, 0.0156, 0.0057, 0.014], "ultimo": 3827, "data": "11/11/2026", "n": 3827, "atualizado": "embutida"};
+var BASELF = {"pop": [-0.0002, 0.0055, 0.0168, -0.0053, 0.0218, -0.053, 0.0038, 0.0012, 0.0065, 0.019, 0.0051, -0.0001, 0.0331, -0.0038, 0.0029, -0.0495, -0.0054, -0.0009, 0.0013, -0.0008, -0.0176, -0.0208, 0.0156, 0.0057, 0.014], "ultimo": 3827, "data": "11/11/2026", "n": 3827, "atualizado": "embutida", "ult": [[3778, "02/09/2026", [1, 2, 3, 5, 6, 8, 9, 10, 13, 14, 16, 17, 18, 20, 22], [7.0, 14.0, 35.0, 1777.12, 0]], [3779, "03/09/2026", [3, 4, 5, 7, 8, 10, 11, 13, 14, 16, 17, 19, 23, 24, 25], [7.0, 14.0, 35.0, 889.16, 532221.72]], [3780, "15/09/2026", [1, 2, 3, 4, 5, 6, 7, 12, 15, 16, 17, 19, 21, 22, 23], [3.5, 7.0, 17.5, 2762.74, 4488579.0]], [3781, "16/09/2026", [3, 5, 6, 7, 8, 9, 11, 12, 13, 16, 19, 21, 22, 24, 25], [7.0, 14.0, 35.0, 1815.85, 0]], [3782, "17/09/2026", [3, 4, 5, 7, 8, 11, 15, 16, 17, 18, 19, 20, 22, 23, 25], [7.0, 14.0, 35.0, 2008.28, 3876827.04]], [3783, "18/09/2026", [1, 3, 4, 5, 6, 12, 14, 15, 16, 17, 19, 22, 23, 24, 25], [7.0, 14.0, 35.0, 2096.78, 0]], [3784, "20/09/2026", [1, 2, 8, 10, 11, 12, 15, 16, 18, 19, 20, 21, 22, 24, 25], [7.0, 14.0, 35.0, 1844.33, 3999286.18]], [3785, "21/09/2026", [1, 4, 7, 8, 11, 12, 14, 15, 17, 18, 19, 22, 23, 24, 25], [7.0, 14.0, 35.0, 1512.37, 711908.8]], [3786, "22/09/2026", [1, 3, 6, 7, 8, 9, 12, 13, 14, 16, 18, 21, 23, 24, 25], [7.0, 14.0, 35.0, 2337.93, 1490773.81]], [3787, "23/09/2026", [3, 4, 6, 8, 10, 11, 12, 13, 15, 17, 19, 20, 22, 23, 24], [7.0, 14.0, 35.0, 1086.93, 0]], [3788, "24/09/2026", [1, 4, 5, 7, 8, 9, 12, 16, 17, 18, 20, 21, 22, 23, 24], [7.0, 14.0, 35.0, 2929.06, 0]], [3789, "25/09/2026", [6, 7, 8, 9, 11, 12, 13, 14, 15, 16, 17, 18, 19, 23, 25], [7.0, 14.0, 35.0, 2259.58, 8055220.68]], [3790, "27/09/2026", [1, 3, 4, 5, 6, 7, 9, 11, 14, 15, 16, 17, 20, 21, 25], [7.0, 14.0, 35.0, 2094.06, 6473807.39]], [3791, "28/09/2026", [1, 2, 4, 6, 8, 9, 11, 12, 13, 14, 15, 16, 19, 24, 25], [7.0, 14.0, 35.0, 2269.43, 1612688.47]], [3792, "29/09/2026", [2, 4, 6, 7, 8, 10, 11, 12, 14, 15, 16, 20, 23, 24, 25], [7.0, 14.0, 35.0, 2216.99, 510692.66]], [3793, "30/09/2026", [1, 3, 7, 8, 10, 11, 13, 14, 15, 17, 19, 20, 21, 24, 25], [7.0, 14.0, 35.0, 775.79, 537416.65]], [3794, "01/10/2026", [1, 3, 4, 5, 6, 8, 10, 12, 13, 15, 18, 19, 21, 23, 24], [7.0, 14.0, 35.0, 981.74, 444649.02]], [3795, "02/10/2026", [1, 3, 4, 5, 6, 8, 10, 11, 12, 13, 14, 18, 19, 22, 24], [7.0, 14.0, 35.0, 1385.85, 1452755.06]], [3796, "03/10/2026", [3, 4, 5, 6, 7, 9, 10, 11, 12, 15, 16, 19, 20, 21, 24], [7.0, 14.0, 35.0, 1829.15, 1831968.18]], [3797, "05/10/2026", [1, 2, 3, 6, 7, 8, 9, 10, 13, 14, 16, 18, 19, 20, 23], [7.0, 14.0, 35.0, 2289.59, 0]], [3798, "06/10/2026", [1, 2, 4, 5, 6, 7, 8, 9, 10, 11, 14, 18, 19, 20, 23], [7.0, 14.0, 35.0, 2048.52, 1584075.31]], [3799, "07/10/2026", [1, 3, 4, 5, 7, 8, 10, 12, 13, 18, 19, 20, 23, 24, 25], [7.0, 14.0, 35.0, 656.75, 510861.35]], [3800, "08/10/2026", [1, 2, 3, 4, 5, 7, 8, 9, 10, 12, 13, 14, 15, 19, 21], [7.0, 14.0, 35.0, 1505.65, 1805183.78]], [3801, "09/10/2026", [3, 4, 7, 8, 9, 11, 12, 13, 15, 17, 19, 20, 21, 23, 24], [7.0, 14.0, 35.0, 905.56, 322726.1]], [3802, "11/10/2026", [2, 3, 5, 6, 9, 10, 11, 12, 14, 15, 19, 20, 21, 23, 24], [7.0, 14.0, 35.0, 1428.41, 820218.59]], [3803, "13/10/2026", [3, 6, 7, 8, 9, 11, 12, 13, 15, 16, 19, 20, 21, 22, 23], [7.0, 14.0, 35.0, 1955.63, 946676.32]], [3804, "14/10/2026", [1, 2, 6, 7, 8, 12, 14, 15, 16, 17, 18, 19, 21, 24, 25], [7.0, 14.0, 35.0, 2663.67, 0]], [3805, "15/10/2026", [3, 5, 6, 7, 8, 10, 11, 13, 14, 15, 19, 22, 23, 24, 25], [7.0, 14.0, 35.0, 2227.47, 2059240.91]], [3806, "16/10/2026", [4, 5, 6, 7, 8, 9, 11, 13, 16, 19, 20, 21, 23, 24, 25], [7.0, 14.0, 35.0, 2642.48, 806564.34]], [3807, "18/10/2026", [1, 3, 4, 7, 10, 11, 13, 16, 17, 19, 20, 22, 23, 24, 25], [7.0, 14.0, 35.0, 1173.7, 445386.24]], [3808, "19/10/2026", [1, 4, 7, 10, 12, 13, 14, 15, 17, 18, 19, 20, 21, 22, 24], [7.0, 14.0, 35.0, 1920.13, 1456047.72]], [3809, "20/10/2026", [1, 3, 4, 5, 6, 8, 9, 11, 17, 18, 19, 20, 21, 23, 25], [7.0, 14.0, 35.0, 1924.65, 0]], [3810, "21/10/2026", [1, 5, 6, 7, 10, 11, 14, 15, 16, 17, 18, 19, 20, 23, 24], [7.0, 14.0, 35.0, 3242.04, 0]], [3811, "22/10/2026", [1, 3, 5, 7, 8, 9, 10, 11, 12, 15, 16, 18, 19, 23, 25], [7.0, 14.0, 35.0, 1160.69, 3832338.98]], [3812, "23/10/2026", [3, 4, 5, 7, 8, 11, 13, 16, 17, 19, 20, 21, 23, 24, 25], [7.0, 14.0, 35.0, 1024.45, 288143.9]], [3813, "24/10/2026", [4, 5, 6, 8, 10, 12, 13, 14, 15, 16, 17, 20, 22, 23, 25], [7.0, 14.0, 35.0, 2278.37, 0]], [3814, "26/10/2026", [1, 4, 6, 8, 9, 12, 13, 15, 16, 17, 18, 21, 22, 24, 25], [7.0, 14.0, 35.0, 2015.87, 2134251.7]], [3815, "27/10/2026", [3, 5, 6, 9, 10, 11, 12, 13, 14, 15, 16, 17, 19, 23, 25], [7.0, 14.0, 35.0, 1943.41, 432535.38]], [3816, "28/10/2026", [1, 2, 3, 4, 6, 8, 13, 14, 16, 17, 18, 20, 22, 24, 25], [7.0, 14.0, 35.0, 2243.02, 0]], [3817, "29/10/2026", [2, 6, 8, 10, 11, 12, 13, 15, 16, 18, 19, 22, 23, 24, 25], [7.0, 14.0, 35.0, 2242.58, 3995036.64]], [3818, "30/10/2026", [2, 3, 4, 5, 6, 12, 14, 15, 16, 17, 19, 20, 22, 23, 24], [7.0, 14.0, 35.0, 2622.18, 881659.15]], [3819, "01/11/2026", [1, 5, 6, 7, 8, 9, 11, 12, 13, 14, 15, 16, 22, 24, 25], [7.0, 14.0, 35.0, 3019.41, 0]], [3820, "03/11/2026", [2, 3, 5, 6, 11, 12, 13, 14, 15, 16, 21, 22, 23, 24, 25], [7.0, 14.0, 35.0, 1915.08, 4787660.62]], [3821, "04/11/2026", [1, 5, 6, 9, 10, 12, 14, 17, 18, 19, 20, 21, 22, 23, 25], [7.0, 14.0, 35.0, 2214.5, 0]], [3822, "05/11/2026", [1, 2, 6, 7, 9, 10, 12, 13, 15, 17, 18, 20, 21, 24, 25], [7.0, 14.0, 35.0, 1075.91, 1433853.15]], [3823, "06/11/2026", [3, 6, 7, 8, 10, 11, 15, 16, 17, 18, 20, 21, 22, 23, 24], [7.0, 14.0, 35.0, 2924.45, 976316.42]], [3824, "08/11/2026", [1, 2, 3, 7, 11, 12, 13, 14, 15, 17, 18, 19, 22, 24, 25], [7.0, 14.0, 35.0, 1997.57, 800258.57]], [3825, "09/11/2026", [1, 3, 4, 5, 6, 7, 8, 9, 10, 14, 15, 17, 19, 20, 23], [7.0, 14.0, 35.0, 1922.36, 1622768.4]], [3826, "10/11/2026", [1, 2, 3, 5, 8, 9, 12, 13, 15, 18, 19, 21, 22, 24, 25], [7.0, 14.0, 35.0, 1033.24, 408185.03]], [3827, "11/11/2026", [1, 2, 4, 5, 6, 10, 11, 13, 15, 16, 18, 20, 21, 22, 23], [7.0, 14.0, 35.0, 1159.99, 0]]]};
 var POPLF = BASELF.pop;
 var FECH = {"18-14":[[3,4,5,6,7,8,9,10,11,12,13,14,15,16,17],[0,1,2,6,7,8,9,10,11,12,13,14,15,16,17],[0,1,2,3,4,5,9,10,11,12,13,14,15,16,17],[0,1,2,3,4,5,6,7,8,12,13,14,15,16,17],[0,1,2,3,4,5,6,7,8,9,10,11,15,16,17],[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14],[1,2,4,5,7,8,9,10,11,12,13,14,15,16,17],[0,2,3,5,6,8,9,10,11,12,13,14,15,16,17],[0,1,3,4,6,7,9,10,11,12,13,14,15,16,17],[0,1,2,3,4,5,6,7,8,10,11,13,14,16,17],[0,1,2,3,4,5,6,7,8,9,11,12,14,15,17],[0,1,2,3,4,5,6,7,8,9,10,12,13,15,16],[1,2,3,5,6,7,9,10,11,12,13,14,15,16,17],[1,2,3,4,6,8,9,10,11,12,13,14,15,16,17],[0,2,4,5,6,7,9,10,11,12,13,14,15,16,17],[0,2,3,4,7,8,9,10,11,12,13,14,15,16,17],[0,1,4,5,6,8,9,10,11,12,13,14,15,16,17],[0,1,3,5,7,8,9,10,11,12,13,14,15,16,17],[0,1,2,3,4,5,6,7,8,10,11,12,14,15,16],[0,1,2,3,4,5,6,7,8,10,11,12,13,15,17],[0,1,2,3,4,5,6,7,8,9,11,13,14,15,16],[0,1,2,3,4,5,6,7,8,9,11,12,13,16,17],[0,1,2,3,4,5,6,7,8,9,10,13,14,15,17],[0,1,2,3,4,5,6,7,8,9,10,12,14,16,17]],"20-13":[[5,6,7,8,9,10,11,12,13,14,15,16,17,18,19],[0,1,2,3,4,10,11,12,13,14,15,16,17,18,19],[0,1,2,3,4,5,6,7,8,9,15,16,17,18,19],[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14],[2,3,4,6,7,8,9,11,12,13,14,16,17,18,19],[0,1,4,5,7,8,9,10,12,13,14,15,17,18,19],[0,1,2,3,5,6,9,10,11,13,14,15,16,18,19],[0,1,2,3,5,6,7,8,10,11,12,15,16,17,19],[1,3,4,5,6,7,8,10,11,13,14,15,16,17,18],[0,2,4,5,6,8,9,10,11,12,14,15,16,17,18],[1,2,3,4,5,7,9,10,11,12,13,15,16,18,19],[0,2,3,4,6,7,9,10,12,13,14,15,16,17,19],[0,1,3,4,5,6,8,9,11,12,13,16,17,18,19],[0,1,2,3,6,7,8,9,11,12,13,14,15,17,18],[0,1,2,4,5,7,8,9,10,11,13,14,16,17,19],[0,1,2,4,5,6,7,8,12,13,14,15,16,18,19],[0,1,3,4,6,7,8,9,10,11,12,14,15,18,19],[1,2,3,4,5,6,8,9,10,12,13,14,15,17,19],[0,2,3,4,5,6,7,8,10,11,13,15,17,18,19],[0,1,2,3,5,7,8,9,10,12,13,14,16,17,18],[0,1,2,4,5,6,7,9,10,11,12,14,17,18,19],[0,3,4,5,7,8,9,11,12,13,14,15,16,17,19],[0,1,2,4,6,7,9,10,11,12,13,15,16,17,18],[1,2,3,4,5,7,8,9,10,11,14,15,16,18,19],[0,1,3,4,5,6,7,10,11,12,14,16,17,18,19],[0,1,2,3,6,8,9,10,11,13,14,15,16,18,19],[1,2,3,4,5,6,7,9,11,12,13,14,15,16,17],[0,2,3,4,5,6,7,8,10,12,13,15,16,18,19],[0,1,2,3,5,8,9,11,12,13,14,15,17,18,19],[0,1,4,6,7,8,9,10,11,13,14,15,16,17,19],[1,2,3,6,7,8,9,10,12,13,14,16,17,18,19],[0,2,3,5,6,7,9,10,11,13,14,15,17,18,19],[0,1,2,3,4,7,8,9,10,11,12,15,16,17,18],[0,1,3,5,6,8,9,10,11,12,13,14,16,18,19],[1,2,4,5,6,8,10,11,12,13,14,15,17,18,19],[0,1,3,4,5,6,7,9,10,13,14,15,16,17,18],[0,2,3,4,5,6,8,9,11,12,13,14,15,16,19],[0,1,2,3,5,6,8,9,10,13,15,16,17,18,19],[1,2,3,4,5,6,7,8,9,10,11,12,13,15,19],[4,5,7,8,9,10,11,12,13,14,15,16,17,18,19],[0,1,2,3,6,8,10,11,12,13,14,16,17,18,19],[2,3,4,5,6,7,8,10,12,14,15,16,17,18,19]]};
 var JOGO = 'mega';
@@ -475,7 +522,7 @@ function simulaLF(r,gasto){
 function pct(v){return v<0.1?'menos de 0,1%':v<10?'≈ '+v.toFixed(1).replace('.',',')+'%':'≈ '+Math.round(v)+'%'}
 
 // ---- tela ----
-var atual='espalhada',ultimoTexto='',ultimoCSV='',ultimoNome='';
+var atual='espalhada',ultimoTexto='',ultimoCSV='',ultimoNome='',JOGOS=null;
 function valor(){var v=parseInt($('valor').value,10);if(isNaN(v))v=0;return Math.max(0,Math.min(30000,v))}
 function d2(x){return(x<10?'0':'')+x}
 function extremos(){
@@ -533,6 +580,7 @@ function geraLF(){
     else hs+='<li><i>'+(i+1)+'</i>'+txt+'</li>';
   });
   $('grandes').innerHTML=hg;$('grandes').hidden=!hg;$('simples').innerHTML=hs;$('simples').classList.add('lf');
+  JOGOS={jogo:'lf',estr:e.nome,total:p.total,jogos:r.apostas.map(function(a){return a.d})};
   ultimoTexto='aposta;tipo;valor;dezenas\n'+linhas.join('\n');ultimoCSV='﻿'+csv.join('\r\n')+'\r\n';
   ultimoNome='bolao-lotofacil-'+e.nome.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-')+'-R'+Math.floor(p.total)+'.csv';
   $('msg').textContent='';
@@ -568,6 +616,7 @@ function gera(){
     else hs+='<li><i>'+(i+1)+'</i>'+txt+'</li>';
   });
   $('grandes').innerHTML=hg;$('grandes').hidden=!hg;$('simples').innerHTML=hs;
+  JOGOS={jogo:'mega',estr:e.nome,total:p.total,jogos:r.jogos};
   ultimoTexto='aposta;tipo;valor;dezenas\n'+linhas.join('\n');ultimoCSV='﻿'+csv.join('\r\n')+'\r\n';
   ultimoNome='bolao-megasena-'+e.nome.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-')+'-R'+p.total+'.csv';
   $('msg').textContent='';
@@ -593,8 +642,12 @@ function trocaJogo(j){
   ESCOLHA[JOGO]=atual;JOGO=j;atual=ESCOLHA[j];
   try{localStorage.setItem('bolaoJogo',j)}catch(e){}
   aplicaTextos();montaEstrategias();mostraBase();atualiza();gera();
+  if(!$('abaSimular').hidden){mostraJogosSim();$('simRes').hidden=true;$('simProg').textContent=''}
 }
 atual=ESCOLHA[JOGO];
+$('tabGerar').addEventListener('click',function(){trocaAba('gerar')});
+$('tabSimular').addEventListener('click',function(){trocaAba('simular')});
+$('simular').addEventListener('click',simular);
 $('jogo').addEventListener('click',function(ev){var j=ev.target.getAttribute&&ev.target.getAttribute('data-j');if(j)trocaJogo(j)});
 $('strats').addEventListener('change',function(ev){if(ev.target.name==='estr'){atual=ev.target.value;atualiza()}});
 $('valor').addEventListener('input',atualiza);
@@ -607,8 +660,92 @@ $('copiar').addEventListener('click',function(){
   try{navigator.clipboard.writeText(ultimoTexto).then(function(){$('msg').textContent='Copiado. Agora é só colar.'},falhou)}catch(e){falhou()}
 });
 
+// ---- simular acertos nos ultimos sorteios reais ----
+var FAIXAS={mega:[4,5,6],lf:[11,12,13,14,15]},simCSV='',simNome='';
+function contaAcertos(jogos,dez,jogo){
+  var tam=jogo==='lf'?15:6,F=FAIXAS[jogo],c=F.map(function(){return 0}),em={},i;
+  for(i=0;i<dez.length;i++)em[dez[i]]=1;
+  for(var j=0;j<jogos.length;j++){
+    var d=jogos[j],h=0;for(i=0;i<d.length;i++)if(em[d[i]])h++;
+    if(h<F[0])continue;
+    for(var k=0;k<F.length;k++)c[k]+=cb(h,F[k])*cb(d.length-h,tam-F[k]);
+  }
+  return c;
+}
+function novosJogos(){
+  if(JOGO==='lf'){var p=planoLF(atual,valor());return{total:p.total,jogos:gerarLF(atual,p).apostas.map(function(a){return a.d})}}
+  var q=plano(atual,valor());return{total:q.total,jogos:gerar(atual,q).jogos};
+}
+function mostraJogosSim(){
+  var e=lista().filter(function(x){return x.id===atual})[0];
+  $('simTitulo').textContent='Simular acertos: '+(JOGO==='lf'?'Lotofácil':'Mega-Sena');
+  $('simJogos').textContent='Estratégia '+e.nome+', bolão de '+dinheiro(JOGO==='lf'?planoLF(atual,valor()).total:plano(atual,valor()).total)+' por sorteio. Para mudar, use a aba Gerar jogos.';
+}
+function simular(){
+  var jogo=JOGO,b=jogo==='lf'?BASELF:BASE,N=parseInt($('simN').value,10),modo=$('simModo').value;
+  var ult=(b.ult||[]).slice(-N),F=FAIXAS[jogo];
+  if(!ult.length){$('simProg').textContent='A base não tem os últimos sorteios. Importe a planilha da Caixa.';return}
+  if(modo==='mesmos'&&(!JOGOS||JOGOS.jogo!==jogo))gera();
+  var linhas=[],i=0,btn=$('simular');btn.disabled=true;
+  function passo(){
+    var fim=Math.min(ult.length,i+(modo==='novos'?1:10));
+    for(;i<fim;i++){
+      var s=ult[i],J=modo==='novos'?novosJogos():{total:JOGOS.total,jogos:JOGOS.jogos};
+      var c=contaAcertos(J.jogos,s[2],jogo),pr=s[3]||[],premio=0,acum=false;
+      for(var k=0;k<F.length;k++){if(c[k]){if(pr[k]>0)premio+=c[k]*pr[k];else if(k===F.length-1)acum=true}}
+      linhas.push({n:s[0],data:s[1],valor:J.total,c:c,premio:premio,acum:acum});
+    }
+    $('simProg').textContent='Simulando '+i+' de '+ult.length+' sorteios…';
+    if(i<ult.length)setTimeout(passo,0);else{btn.disabled=false;mostraSim(linhas,jogo,modo)}
+  }
+  setTimeout(passo,0);
+}
+function mostraSim(L,jogo,modo){
+  var F=FAIXAS[jogo],nomes=jogo==='lf'?['11 pts','12 pts','13 pts','14 pts','15 pts']:['Quadras','Quinas','Senas'];
+  var apost=0,ganho=0,com=0,tot=F.map(function(){return 0}),melhor=null;
+  L.forEach(function(l){apost+=l.valor;ganho+=l.premio;if(l.premio>0||l.acum)com++;l.c.forEach(function(v,k){tot[k]+=v});if(!melhor||l.premio>melhor.premio)melhor=l});
+  var saldo=ganho-apost,e=lista().filter(function(x){return x.id===atual})[0];
+  $('simStats').innerHTML='<div><b>'+dinheiro(apost)+'</b><span>apostado em '+L.length+' sorteios</span></div>'+
+    '<div><b>'+dinheiro(ganho)+'</b><span>ganho em prêmios</span></div>'+
+    '<div><b>'+(saldo<0?'− ':'+ ')+dinheiro(Math.abs(saldo))+'</b><span>saldo ('+Math.round(100*ganho/apost)+'% voltou)</span></div>'+
+    '<div><b>'+com+' de '+L.length+'</b><span>sorteios com prêmio</span></div>'+
+    (melhor&&melhor.premio>0?'<div><b>'+dinheiro(melhor.premio)+'</b><span>melhor sorteio (concurso '+melhor.n+')</span></div>':'');
+  var h='<thead><tr><th>#</th><th>Concurso</th><th>Data</th><th>Bolão</th>'+nomes.map(function(x){return '<th>'+x+'</th>'}).join('')+'<th>Prêmio</th></tr></thead><tbody>';
+  var csv=['Simulacao;Concurso;Data;Valor do bolao (R$);'+nomes.join(';')+';Premio (R$)'];
+  L.forEach(function(l,i){
+    h+='<tr'+(l.premio>0||l.acum?' class="ganhou"':'')+'><td>'+(i+1)+'</td><td>'+l.n+'</td><td>'+l.data.slice(0,5)+'</td><td>'+dinheiro(l.valor).replace('R$ ','')+'</td>'+
+      l.c.map(function(v){return v?'<td>'+br(v)+'</td>':'<td class="z">0</td>'}).join('')+'<td class="premio">'+(l.premio>0?dinheiro(l.premio).replace('R$ ',''):'0')+(l.acum?'*':'')+'</td></tr>';
+    csv.push([i+1,l.n,l.data,l.valor.toFixed(2).replace('.',',')].concat(l.c).concat([l.premio.toFixed(2).replace('.',',')+(l.acum?' + premio acumulado':'')]).join(';'));
+  });
+  h+='</tbody><tfoot><tr><td colspan="3">Total</td><td>'+dinheiro(apost).replace('R$ ','')+'</td>'+tot.map(function(v){return '<td>'+br(v)+'</td>'}).join('')+'<td>'+dinheiro(ganho).replace('R$ ','')+'</td></tr></tfoot>';
+  $('simTab').innerHTML=h;$('simRes').hidden=false;$('simMsg').textContent='';
+  $('simProg').textContent=(modo==='novos'?'Um bolão novo para cada sorteio':'Os mesmos jogos em todos os sorteios')+', estratégia '+e.nome+'.';
+  simCSV='\ufeff'+csv.join('\r\n')+'\r\n';
+  simNome='simulacao-'+(jogo==='lf'?'lotofacil':'megasena')+'-'+e.nome.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-')+'-'+L.length+'-sorteios.csv';
+}
+function trocaAba(a){
+  var sim=a==='simular';
+  $('abaGerar').hidden=sim;$('abaSimular').hidden=!sim;
+  $('tabGerar').setAttribute('aria-selected',String(!sim));$('tabSimular').setAttribute('aria-selected',String(sim));
+  if(sim)mostraJogosSim();
+}
+
 // ---- exportar CSV ----
 var temClaude=!!(window.claude&&window.claude.use),dlPromise=temClaude?window.claude.use('downloads'):Promise.resolve(null);
+function salvaArquivo(nome,dados,msgEl){
+  dlPromise.then(function(dl){
+    if(dl){
+      dl.save({filename:nome,data:dados}).then(function(){$(msgEl).textContent='Arquivo '+nome+' salvo.'},function(err){
+        var c=err&&err.code;
+        $(msgEl).textContent=c==='declined'?'Download cancelado.':c==='rate_limited'?'Já há um download esperando confirmação. Tente de novo em instantes.':'Não foi possível baixar aqui.';
+      });
+    }else if(!temClaude){
+      var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([dados],{type:'text/csv'}));a.download=nome;document.body.appendChild(a);a.click();a.remove();
+      $(msgEl).textContent='Arquivo '+nome+' baixado.';
+    }else{$(msgEl).textContent='Download indisponível nesta tela.'}
+  });
+}
+$('simExportar').addEventListener('click',function(){if(simCSV)salvaArquivo(simNome,simCSV,'simMsg')});
 $('exportar').addEventListener('click',function(){
   if(!ultimoCSV)return;
   dlPromise.then(function(dl){
@@ -650,7 +787,8 @@ function lerLinhas(matriz){
     var l=matriz[i]||[],n=parseInt(numero(l[col.concurso]),10);if(!n)continue;
     var d=[];for(j=0;j<nb;j++)d.push(parseInt(numero(l[bolas[j]]),10));
     if(d.some(function(x){return!(x>=1&&x<=maxN)}))continue;
-    rows.push({n:n,data:dataBR(l[cdt]),d:d,g:cg!=null?numero(l[cg]):0,ar:car!=null?numero(l[car]):0});
+    var pr=FAIXAS[lf?'lf':'mega'].map(function(k){var c=col['rateio'+k+'acertos'];return c!=null?numero(l[c]):0});
+    rows.push({n:n,data:dataBR(l[cdt]),d:d.slice().sort(function(a,b){return a-b}),g:cg!=null?numero(l[cg]):0,ar:car!=null?numero(l[car]):0,pr:pr});
   }
   rows.sort(function(a,b){return a.n-b.n});
   if(!rows.length)throw new Error('A planilha não tem concursos que eu consiga ler.');
@@ -668,7 +806,8 @@ function calcBase(rows,jogo){
     p.d.forEach(function(x){soma[x-1]+=res;qt[x-1]++});
   });
   var desc=jogo==='lf'?somaRes/pts.length:0,dec=jogo==='lf'?1e4:1e3,u=rows[rows.length-1];
-  return{pop:soma.map(function(s,i){return qt[i]?Math.round((s/qt[i]-desc)*dec)/dec:0}),ultimo:u.n,data:u.data,n:rows.length,atualizado:new Date().toLocaleDateString('pt-BR')};
+  var ult=rows.slice(-50).map(function(r){return[r.n,r.data,r.d,r.pr||[]]});
+  return{pop:soma.map(function(s,i){return qt[i]?Math.round((s/qt[i]-desc)*dec)/dec:0}),ultimo:u.n,data:u.data,n:rows.length,atualizado:new Date().toLocaleDateString('pt-BR'),ult:ult};
 }
 function linhaBase(b){return br(b.n)+' sorteios, até o concurso '+b.ultimo+' ('+b.data+')'}
 function mostraBase(){
@@ -678,6 +817,7 @@ function mostraBase(){
   $('versaoTopo').textContent=APP_VERSAO;$('versaoRodape').textContent=APP_VERSAO+' · Mega base '+BASE.ultimo+' · Lotofácil base '+BASELF.ultimo;
 }
 function aplicaBase(b,origem,jogo){
+  if(!b.ult||!b.ult.length)b.ult=(jogo==='lf'?BASELF:BASE).ult;
   if(jogo==='lf'){BASELF=b;POPLF=b.pop}else{BASE=b;POP=b.pop}
   ORIGEM[jogo]=origem;montaEstrategias();atualiza();mostraBase();
 }
