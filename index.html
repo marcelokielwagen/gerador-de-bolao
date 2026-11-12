@@ -1,4 +1,5 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Gerador Bolão Virada</title>
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Gerador de Bolão</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='22' cy='38' r='16' fill='%23209869'/%3E%3Ccircle cx='42' cy='26' r='16' fill='%23930089'/%3E%3Ccircle cx='42' cy='26' r='7' fill='%23fff'/%3E%3Ccircle cx='22' cy='38' r='7' fill='%23fff'/%3E%3C/svg%3E">
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap">
 <style>
@@ -95,6 +96,8 @@ footer strong{color:var(--ink);font-weight:600}
 label.btn{display:inline-block}
 .strat .why{background:color-mix(in srgb,var(--mark) 22%,transparent);border-left:3px solid var(--mark);padding:6px 10px;border-radius:0 4px 4px 0;margin:4px 0 2px}
 .msg:empty{display:none}
+.marca{display:flex;align-items:center;gap:12px}
+.logo{width:58px;height:58px;flex:none}
 .jogo{display:grid;grid-template-columns:1fr 1fr;border:2px solid var(--ink);border-radius:8px;overflow:hidden;max-width:440px}
 .jogo button{font:700 17px var(--display);padding:11px 8px;border:0;background:var(--surface);color:var(--ink);cursor:pointer}
 .jogo button+button{border-left:2px solid var(--ink)}
@@ -113,11 +116,17 @@ label.btn{display:inline-block}
 <script src="https://telegram.org/js/telegram-web-app.js"></script><script>try{var tw=window.Telegram&&Telegram.WebApp;if(tw&&tw.initData!==undefined){tw.ready();tw.expand()}}catch(e){}</script></head><body><div class="wrap">
 <header class="stack">
   <div class="topo" aria-hidden="true"></div>
-  <span class="eyebrow"><span id="eyebrow">Mega da Virada 2026 · concurso 3100</span> · <span id="versaoTopo">v2.0</span></span>
-  <h1>Gerador de jogos do bolão</h1>
+  <span class="eyebrow"><span id="eyebrow">Mega-Sena · qualquer concurso, inclusive a Virada</span> · <span id="versaoTopo">v2.1</span></span>
+  <div class="marca">
+    <svg class="logo" viewBox="0 0 64 64" aria-hidden="true">
+      <circle cx="21" cy="41" r="19" fill="#209869"/><circle cx="21" cy="41" r="11" fill="#fff"/><text x="21" y="46" text-anchor="middle" font-size="14" font-weight="700" fill="#209869" font-family="IBM Plex Mono,monospace">6</text>
+      <circle cx="43" cy="23" r="19" fill="#930089" stroke="var(--bg)" stroke-width="2"/><circle cx="43" cy="23" r="11" fill="#fff"/><text x="43" y="27.5" text-anchor="middle" font-size="12" font-weight="700" fill="#930089" font-family="IBM Plex Mono,monospace">15</text>
+    </svg>
+    <h1>Gerador de Bolão</h1>
+  </div>
   <p class="lead" id="lead">Informe o valor, escolha a estratégia e gere os jogos. As regras saem dos sorteios oficiais da Mega-Sena.</p>
   <div class="jogo" id="jogo" role="group" aria-label="Escolha o jogo">
-    <button type="button" data-j="mega" aria-pressed="true">Mega da Virada</button>
+    <button type="button" data-j="mega" aria-pressed="true">Mega-Sena</button>
     <button type="button" data-j="lf" aria-pressed="false">Lotofácil</button>
   </div>
   <p class="basebar"><span class="dot" aria-hidden="true"></span><span id="baseTopo">Base: carregando…</span></p>
@@ -188,13 +197,13 @@ label.btn{display:inline-block}
 </section>
 
 <footer>
-  <p><strong>Gerador Bolão Virada <span id="versaoRodape">v2.0</span></strong> · desenvolvido por Claude Opus 5.5</p>
+  <p><strong>Gerador de Bolão <span id="versaoRodape">v2.1</span></strong> · desenvolvido por Claude Opus 5.5</p>
   <p>Dados oficiais da Caixa. Estudo independente, sem vínculo com a Caixa. A página só gera os números; a aposta é feita por você.</p>
 </footer>
 </div>
 
 <script>
-var APP_VERSAO = 'v2.0';
+var APP_VERSAO = 'v2.1';
 // base embutida: popularidade de cada dezena (1..60, acima de zero = mais jogada que a media) e ate onde vao os sorteios
 var BASE = {"pop": [0.035, 0.124, 0.321, 0.109, 0.248, 0.097, 0.218, 0.109, 0.142, 0.16, 0.137, 0.147, 0.243, 0.056, 0.068, 0.031, 0.151, 0.065, 0.128, 0.013, -0.009, 0.036, 0.095, 0.124, 0.11, -0.049, 0.1, 0.021, 0.116, -0.109, -0.12, -0.034, 0.097, -0.007, -0.0, 0.029, 0.006, -0.046, -0.067, -0.085, -0.125, -0.023, -0.034, 0.061, -0.019, -0.064, -0.04, -0.058, -0.045, -0.205, -0.063, -0.088, -0.046, -0.071, -0.109, -0.02, -0.035, 0.023, -0.083, -0.084], "ultimo": 3084, "data": "10/11/2026", "n": 3070, "atualizado": "embutida"};
 var POP = BASE.pop;
@@ -207,7 +216,7 @@ try{if(localStorage.getItem('bolaoJogo')==='lf')JOGO='lf'}catch(e){}
 var ESCOLHA = {mega:'espalhada', lf:'lf_amplo'};
 var ORIGEM = {mega:'embutida nesta versão do app', lf:'embutida nesta versão do app'};
 var TEXTO = {
-  mega:{eyebrow:'Mega da Virada 2026 · concurso 3100',
+  mega:{eyebrow:'Mega-Sena · qualquer concurso, inclusive a Virada',
     lead:'Informe o valor, escolha a estratégia e gere os jogos. As regras saem dos sorteios oficiais da Mega-Sena.',
     hintEstr:'A chance da sena é igual em todas. Muda quantas vezes você ganha algo e quanto leva. Toque em uma para ver como ela escolhe os números.',
     regras:['Poucas dezenas até 31: muita gente aposta datas de aniversário, e resultados cheios delas tiveram até 1,8 vez mais ganhadores dividindo o prêmio.',
@@ -217,7 +226,7 @@ var TEXTO = {
   lf:{eyebrow:'Lotofácil · sorteios de segunda a sábado',
     lead:'Informe o valor, escolha a estratégia e gere os jogos. As regras saem dos sorteios oficiais da Lotofácil.',
     hintEstr:'A chance de 15 pontos é praticamente igual em todas. Muda quantas vezes você faz 14 e quantas vezes recupera o dinheiro. Toque em uma para ver como ela escolhe os números.',
-    regras:['Leve preferência pelas dezenas menos jogadas pelo público: se vier 14 ou 15 pontos, o prêmio é dividido com menos gente. Nos sorteios com dezenas pouco jogadas houve cerca de 25% menos ganhadores de 14.',
+    regras:['Leve preferência pelas dezenas menos jogadas pelo público. Na Lotofácil esse efeito é pequeno: no teste com sorteios que o app não tinha visto, o prêmio de 14 não saiu maior. Fica só como desempate.',
       'Cada jogo simples tem de 6 a 9 ímpares, de 8 a 11 dezenas da moldura (a borda do volante) e soma entre 166 e 224, como cerca de 7 em cada 10 sorteios reais. Isso não aumenta a chance: só evita gastar com combinações esquisitas.',
       'Dezenas quentes, atrasadas e repetidas do concurso anterior não entram na conta: em 3.827 sorteios elas não previram nada.',
       'Jogos afastados uns dos outros: dois jogos simples não repetem mais de 11 dezenas, enquanto o valor permitir.'],
@@ -266,7 +275,7 @@ var ESTRLF = [
    base:'todo o dinheiro vira jogos simples de 15 dezenas, espalhados pelo volante.',
    boa:'é a que tem mais chance de fazer pelo menos um 14 com o mesmo dinheiro.',
    assim:'cada real aposta numa combinação diferente, sem prêmio repetido.',
-   porque:'Escolha se o objetivo é o prêmio de 14 ou 15 pontos. Com R$ 1.000, é a que mais vezes acerta um 14: cerca de 1,3% por concurso.',
+   porque:'Escolha se o objetivo é o prêmio de 14 ou 15 pontos. Com R$ 1.000, acerta um 14 em cerca de 1,3% dos concursos e um 13 em 35%: a mais constante para prêmios médios.',
    escolha:'cada jogo sorteia 15 das 25 dezenas, com leve preferência pelas menos jogadas ({menos}) e menos peso para as mais jogadas ({mais}). Dezena que já entrou em muitos jogos perde peso, para todas rodarem por igual. O jogo só vale se tiver de 6 a 9 ímpares, 8 a 11 dezenas da moldura e soma entre 166 e 224, e se não repetir mais de 11 dezenas de outro jogo.',
    fraco:'os prêmios pequenos vêm espalhados; raramente recupera o valor apostado.'},
   {id:'lf_f14', nome:'Desdobramento 18', lema:'18 dezenas em 24 jogos, com garantia de 14 pontos.',
@@ -560,7 +569,7 @@ function gera(){
   });
   $('grandes').innerHTML=hg;$('grandes').hidden=!hg;$('simples').innerHTML=hs;
   ultimoTexto='aposta;tipo;valor;dezenas\n'+linhas.join('\n');ultimoCSV='﻿'+csv.join('\r\n')+'\r\n';
-  ultimoNome='bolao-virada-'+e.nome.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-')+'-R'+p.total+'.csv';
+  ultimoNome='bolao-megasena-'+e.nome.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-')+'-R'+p.total+'.csv';
   $('msg').textContent='';
   $('resTitulo').textContent='Seus jogos: estratégia '+e.nome;
   $('resumo').textContent=descreve(p)+', total de R$ '+br(p.total)+'. Em média '+(baixas/dez*6).toFixed(1).replace('.',',')+' dezena até 31 a cada 6. Um jogo ao acaso tem 3,1. Dezenas mais usadas neste conjunto: '+cob.map(function(v,i){return[v,i+1]}).sort(function(a,b){return b[0]-a[0]}).slice(0,8).map(function(a){return a[1]}).sort(function(a,b){return a-b}).join(', ')+'.';
